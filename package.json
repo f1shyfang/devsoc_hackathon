@@ -1,0 +1,16 @@
+{
+  "name": "devsoc-hackathon",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:server": "npm --workspace apps/server run dev",
+    "dev": "concurrently -r -k \"npm:dev:web\" \"npm:dev:server\""
+  }
+}
