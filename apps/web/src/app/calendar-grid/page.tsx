@@ -38,8 +38,9 @@ interface Event {
 export default function CalendarGridPage() {
   const queryClient = useQueryClient()
   const [userId] = useState("cmg69p0vb0000kfq7c7at5yzo")
+  // Start with October 2025 to show test events
   const [currentWeekStart, setCurrentWeekStart] = useState(() => 
-    startOfWeek(new Date(), { weekStartsOn: 1 }) // Monday
+    startOfWeek(new Date('2025-10-01'), { weekStartsOn: 1 }) // Monday of first week of October 2025
   )
   const [draggedEvent, setDraggedEvent] = useState<Event | null>(null)
 
@@ -172,10 +173,10 @@ export default function CalendarGridPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1600px] mx-auto p-6">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+      <div className="max-w-[1600px] mx-auto w-full flex flex-col h-full">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="p-6 pb-4 flex items-center justify-between flex-shrink-0">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <Calendar className="w-8 h-8 text-blue-500" />
@@ -194,124 +195,138 @@ export default function CalendarGridPage() {
         </div>
 
         {/* Week Navigation */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6 flex items-center justify-between">
-          <button
-            onClick={() => setCurrentWeekStart(subWeeks(currentWeekStart, 1))}
-            className="p-2 hover:bg-gray-100 rounded"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          
-          <div className="text-lg font-semibold">
-            {format(currentWeekStart, "MMM d")} - {format(addDays(currentWeekStart, 6), "MMM d, yyyy")}
-          </div>
-          
-          <button
-            onClick={() => setCurrentWeekStart(addWeeks(currentWeekStart, 1))}
-            className="p-2 hover:bg-gray-100 rounded"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Calendar Grid */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="grid grid-cols-8 border-b">
-            <div className="p-4 font-semibold text-gray-600 border-r">Time</div>
-            {weekDays.map((day, i) => (
-              <div
-                key={i}
-                className={`p-4 text-center border-r last:border-r-0 ${
-                  format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
-                    ? 'bg-blue-50'
-                    : ''
-                }`}
+        <div className="px-6 pb-4 flex-shrink-0">
+          <div className="bg-white rounded-lg shadow p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentWeekStart(subWeeks(currentWeekStart, 1))}
+                className="p-2 hover:bg-gray-100 rounded"
               >
-                <div className="font-semibold text-gray-900">{format(day, "EEE")}</div>
-                <div className={`text-sm ${
-                  format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
-                    ? 'bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mt-1'
-                    : 'text-gray-600 mt-1'
-                }`}>
-                  {format(day, "d")}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="relative overflow-y-auto" style={{ maxHeight: '800px' }}>
-            {timeSlots.map((timeSlot, slotIndex) => (
-              <div key={slotIndex} className="grid grid-cols-8 border-b h-12">
-                <div className="p-2 text-xs text-gray-500 border-r sticky left-0 bg-white">
-                  {timeSlot}
-                </div>
-                {weekDays.map((day, dayIndex) => {
-                  const events = getEventsForSlot(day, timeSlot)
-                  const isFirstSlotOfEvent = events.some((event: Event) => {
-                    const eventStart = new Date(parseInt(event.startTime))
-                    const [hours, minutes] = timeSlot.split(':').map(Number)
-                    return eventStart.getHours() === hours && eventStart.getMinutes() === minutes
-                  })
-
-                  return (
-                    <div
-                      key={dayIndex}
-                      className="border-r last:border-r-0 relative hover:bg-gray-50"
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, day, timeSlot)}
-                    >
-                      {isFirstSlotOfEvent && events.map((event: Event) => {
-                        const { top, height } = getEventPosition(event, day)
-                        // Only render if this is roughly the right slot
-                        if (Math.abs(top - slotIndex * 48) > 24) return null
-
-                        return (
-                          <div
-                            key={event.id}
-                            draggable
-                            onDragStart={() => handleDragStart(event)}
-                            className={`absolute left-1 right-1 rounded px-2 py-1 cursor-move border-l-4 ${getEventTypeColor(
-                              event.type
-                            )} text-white text-xs overflow-hidden shadow-md hover:shadow-lg transition-shadow z-10`}
-                            style={{
-                              top: `${top - slotIndex * 48}px`,
-                              height: `${height}px`,
-                            }}
-                          >
-                            <div className="font-semibold truncate">{event.title}</div>
-                            <div className="text-xs opacity-90 truncate">
-                              {format(new Date(parseInt(event.startTime)), "h:mm a")}
-                            </div>
-                            {event.location && (
-                              <div className="text-xs opacity-75 truncate">📍 {event.location}</div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
+                className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Today
+              </button>
+            </div>
+            
+            <div className="text-lg font-semibold">
+              {format(currentWeekStart, "MMM d")} - {format(addDays(currentWeekStart, 6), "MMM d, yyyy")}
+            </div>
+            
+            <button
+              onClick={() => setCurrentWeekStart(addWeeks(currentWeekStart, 1))}
+              className="p-2 hover:bg-gray-100 rounded"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="mt-6 bg-white rounded-lg shadow p-4">
-          <h3 className="font-semibold mb-3 text-sm">Event Types</h3>
-          <div className="flex flex-wrap gap-4">
-            {[
-              { type: "CLASS", label: "Classes" },
-              { type: "STUDY", label: "Study Time" },
-              { type: "ASSESSMENT", label: "Assessments" },
-              { type: "SOCIAL", label: "Social" },
-              { type: "CUSTOM", label: "Custom" },
-            ].map(({ type, label }) => (
-              <div key={type} className="flex items-center gap-2">
-                <div className={`w-4 h-4 rounded ${getEventTypeColor(type).split(' ')[0]}`} />
-                <span className="text-sm text-gray-700">{label}</span>
-              </div>
-            ))}
+        {/* Calendar Grid - Scrollable */}
+        <div className="px-6 flex-1 overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-hidden h-full flex flex-col">
+            <div className="grid grid-cols-8 border-b flex-shrink-0">
+              <div className="p-4 font-semibold text-gray-600 border-r">Time</div>
+              {weekDays.map((day, i) => (
+                <div
+                  key={i}
+                  className={`p-4 text-center border-r last:border-r-0 ${
+                    format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+                      ? 'bg-blue-50'
+                      : ''
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">{format(day, "EEE")}</div>
+                  <div className={`text-sm ${
+                    format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+                      ? 'bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mt-1'
+                      : 'text-gray-600 mt-1'
+                  }`}>
+                    {format(day, "d")}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="relative overflow-y-auto flex-1">
+              {timeSlots.map((timeSlot, slotIndex) => (
+                <div key={slotIndex} className="grid grid-cols-8 border-b h-12">
+                  <div className="p-2 text-xs text-gray-500 border-r sticky left-0 bg-white">
+                    {timeSlot}
+                  </div>
+                  {weekDays.map((day, dayIndex) => {
+                    const events = getEventsForSlot(day, timeSlot)
+                    const isFirstSlotOfEvent = events.some((event: Event) => {
+                      const eventStart = new Date(parseInt(event.startTime))
+                      const [hours, minutes] = timeSlot.split(':').map(Number)
+                      return eventStart.getHours() === hours && eventStart.getMinutes() === minutes
+                    })
+
+                    return (
+                      <div
+                        key={dayIndex}
+                        className="border-r last:border-r-0 relative hover:bg-gray-50"
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, day, timeSlot)}
+                      >
+                        {isFirstSlotOfEvent && events.map((event: Event) => {
+                          const { top, height } = getEventPosition(event, day)
+                          // Only render if this is roughly the right slot
+                          if (Math.abs(top - slotIndex * 48) > 24) return null
+
+                          return (
+                            <div
+                              key={event.id}
+                              draggable
+                              onDragStart={() => handleDragStart(event)}
+                              className={`absolute left-1 right-1 rounded px-2 py-1 cursor-move border-l-4 ${getEventTypeColor(
+                                event.type
+                              )} text-white text-xs overflow-hidden shadow-md hover:shadow-lg transition-shadow z-10`}
+                              style={{
+                                top: `${top - slotIndex * 48}px`,
+                                height: `${height}px`,
+                              }}
+                            >
+                              <div className="font-semibold truncate">{event.title}</div>
+                              <div className="text-xs opacity-90 truncate">
+                                {format(new Date(parseInt(event.startTime)), "h:mm a")}
+                              </div>
+                              {event.location && (
+                                <div className="text-xs opacity-75 truncate">📍 {event.location}</div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Legend - Fixed at Bottom */}
+        <div className="px-6 py-4 flex-shrink-0 bg-gray-50">
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="font-semibold mb-3 text-sm">Event Types</h3>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { type: "CLASS", label: "Classes" },
+                { type: "STUDY", label: "Study Time" },
+                { type: "ASSESSMENT", label: "Assessments" },
+                { type: "SOCIAL", label: "Social" },
+                { type: "CUSTOM", label: "Custom" },
+              ].map(({ type, label }) => (
+                <div key={type} className="flex items-center gap-2">
+                  <div className={`w-4 h-4 rounded ${getEventTypeColor(type).split(' ')[0]}`} />
+                  <span className="text-sm text-gray-700">{label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
