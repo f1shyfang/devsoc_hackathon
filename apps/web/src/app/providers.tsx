@@ -1,18 +1,21 @@
 "use client"
-import { SessionProvider } from "next-auth/react"
-import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from "@apollo/client"
 import { ReactNode } from "react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
-const client = new ApolloClient({
-  link: new HttpLink({ uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:4000/graphql" }),
-  cache: new InMemoryCache()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
 })
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <SessionProvider>
-      <ApolloProvider client={client}>{children}</ApolloProvider>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
   )
 }
 
