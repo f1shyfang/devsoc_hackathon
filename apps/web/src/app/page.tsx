@@ -1,146 +1,181 @@
 "use client"
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { gql, useQuery } from "@apollo/client";
-import * as d3 from "d3";
-import { useEffect, useRef } from "react";
-
-const HELLO_QUERY = gql`
-  query Hello {
-    hello
-  }
-`;
-
-function BarChart() {
-  const ref = useRef<SVGSVGElement | null>(null);
-  useEffect(() => {
-    const svg = d3.select(ref.current);
-    const data = [4, 8, 15, 16, 23, 42];
-    const width = 200;
-    const height = 100;
-    const x = d3
-      .scaleBand<string>()
-      .domain(data.map((_, i) => String(i)))
-      .range([0, width])
-      .padding(0.1);
-    const y = d3
-      .scaleLinear()
-      .domain([0, d3.max(data) || 0])
-      .range([height, 0]);
-    svg.selectAll("rect").data(data).join("rect").attr("x", (_, i) => x(String(i)) || 0).attr("y", (d) => y(d)).attr("width", x.bandwidth()).attr("height", (d) => height - y(d)).attr("fill", "#6366f1");
-  }, []);
-  return <svg ref={ref} width={200} height={100} />;
-}
-
-function QueryDemo() {
-  const { data, loading, error } = useQuery(HELLO_QUERY);
-  return (
-    <div className="text-sm text-gray-600 dark:text-gray-300">
-      GraphQL hello: {loading ? "loading..." : error ? `error: ${error.message}` : data?.hello}
-    </div>
-  );
-}
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { Calendar, Users, Clock, TrendingUp, BookOpen, Zap } from "lucide-react"
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const features = [
+    {
+      icon: Calendar,
+      title: "Smart Calendar",
+      description: "Automatically sync your university timetable and manage all your events in one place"
+    },
+    {
+      icon: Users,
+      title: "Find Common Time",
+      description: "Instantly discover when you and your friends are all free for group activities"
+    },
+    {
+      icon: Clock,
+      title: "Availability Detection",
+      description: "Advanced algorithms analyze schedules to find optimal meeting times"
+    },
+    {
+      icon: BookOpen,
+      title: "Assessment Tracking",
+      description: "Track deadlines and automatically schedule study sessions before exams"
+    },
+    {
+      icon: TrendingUp,
+      title: "Schedule Optimization",
+      description: "AI-powered suggestions to balance study, social life, and rest"
+    },
+    {
+      icon: Zap,
+      title: "DevSoc Integration",
+      description: "Seamlessly sync with UNSW course data via DevSoc API"
+    }
+  ]
 
-        <QueryDemo />
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center"
+        >
+          <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-6">
+            Welcome to{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              SyncUp
+            </span>
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            The intelligent social calendar for university students. 
+            Automate scheduling, find common free time, and never miss a study session.
+          </p>
+
+          <div className="flex gap-4 justify-center">
+            <Link
+              href="/calendar"
+              className="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+            >
+              Open Calendar
+            </Link>
+            <a
+              href="http://localhost:4000/graphql"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 bg-white text-gray-800 border-2 border-gray-300 rounded-lg font-semibold hover:border-blue-600 hover:text-blue-600 transition-colors"
+            >
+              GraphQL Playground
+            </a>
+          </div>
         </motion.div>
-        <div className="mt-6"><BarChart /></div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          {[
+            { value: "10+", label: "GraphQL Queries" },
+            { value: "15+", label: "Database Models" },
+            { value: "100%", label: "Open Source" }
+          ].map((stat, index) => (
+            <div key={index} className="bg-white rounded-xl p-6 shadow-md text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">{stat.value}</div>
+              <div className="text-gray-600">{stat.label}</div>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Features Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-20"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Everything You Need to Stay Organized
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 * index }}
+                className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow"
+              >
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                  <feature.icon className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Tech Stack */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="mt-20 bg-white rounded-xl p-8 shadow-md"
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <h2 className="text-2xl font-bold text-center mb-8">Built With Modern Technology</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { name: "Next.js", desc: "App Router" },
+              { name: "GraphQL", desc: "Apollo Server" },
+              { name: "PostgreSQL", desc: "Prisma ORM" },
+              { name: "TypeScript", desc: "Type Safety" }
+            ].map((tech, index) => (
+              <div key={index} className="text-center">
+                <div className="text-lg font-semibold text-gray-900">{tech.name}</div>
+                <div className="text-sm text-gray-600">{tech.desc}</div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="mt-20 text-center"
+        >
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-white">
+            <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+            <p className="text-xl mb-8 opacity-90">
+              Start organizing your schedule and finding time with friends today
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Link
+                href="/calendar"
+                className="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Launch SyncUp
+              </Link>
+              <a
+                href="/SYNCUP_README.md"
+                className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+              >
+                View Documentation
+              </a>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </div>
-  );
+  )
 }
