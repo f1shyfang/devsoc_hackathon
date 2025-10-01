@@ -4,6 +4,12 @@ const DEVSOC_API_URL = process.env.DEVSOC_API_URL || 'https://graphql.csesoc.app
 
 const client = new GraphQLClient(DEVSOC_API_URL)
 
+interface CourseInfo {
+  code: string
+  name: string
+  term: string
+}
+
 interface CourseClass {
   courseCode: string
   courseName: string
@@ -24,6 +30,43 @@ interface TimetableEntry {
   startTime: string
   endTime: string
   location: string
+}
+
+/**
+ * Search for courses from DevSoc API
+ */
+export async function searchCourses(searchTerm: string, term: string = 'T3'): Promise<CourseInfo[]> {
+  const query = gql`
+    query SearchCourses($searchTerm: String!) {
+      courses(where: {
+        _or: [
+          { course_code: { _ilike: $searchTerm } }
+          { course_name: { _ilike: $searchTerm } }
+        ]
+      }
+      limit: 20
+      distinct_on: course_code
+      ) {
+        course_code
+        course_name
+      }
+    }
+  `
+  
+  try {
+    const data: any = await client.request(query, { 
+      searchTerm: `%${searchTerm}%`
+    })
+    
+    return data.courses.map((course: any) => ({
+      code: course.course_code,
+      name: course.course_name,
+      term
+    }))
+  } catch (error) {
+    console.error('Failed to search courses:', error)
+    return []
+  }
 }
 
 /**

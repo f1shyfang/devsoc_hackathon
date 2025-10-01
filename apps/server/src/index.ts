@@ -4,7 +4,8 @@ import cors from 'cors'
 import { ApolloServer, gql } from 'apollo-server-express'
 import { prisma } from '@devsoc/db'
 import { AvailabilityFinder } from './services/availability.js'
-import { fetchCourseSchedules, syncTimetableToDatabase } from './services/devsocApi.js'
+import { fetchCourseSchedules, syncTimetableToDatabase, searchCourses } from './services/devsocApi.js'
+import { findOptimalClassSchedule, calculateOverlapStats } from './services/classMatching.js'
 
 const typeDefs = gql`
   type Query {
@@ -29,6 +30,7 @@ const typeDefs = gql`
     # Course queries
     courses: [Course!]!
     userCourses(userId: ID!): [UserCourse!]!
+    searchCourses(searchTerm: String!, term: String): [CourseSearchResult!]!
     
     # Friendship queries
     friends(userId: ID!): [Friendship!]!
@@ -69,6 +71,9 @@ const typeDefs = gql`
     createGroupEvent(input: CreateGroupEventInput!): GroupEvent!
     inviteToGroupEvent(groupEventId: ID!, userId: ID!): GroupEventParticipant!
     respondToGroupEvent(groupEventId: ID!, userId: ID!, status: String!): GroupEventParticipant!
+    
+    # Smart class scheduling
+    optimizeClassSchedule(userIds: [ID!]!, term: String): OptimizedScheduleResult!
   }
   
   type User {
@@ -102,6 +107,12 @@ const typeDefs = gql`
     code: String!
     name: String!
     term: String
+  }
+  
+  type CourseSearchResult {
+    code: String!
+    name: String!
+    term: String!
   }
   
   type UserCourse {
@@ -160,6 +171,33 @@ const typeDefs = gql`
     success: Boolean!
     eventsCreated: Int!
     message: String
+  }
+  
+  type OptimizedScheduleResult {
+    success: Boolean!
+    classMatches: [ClassMatch!]!
+    stats: ScheduleStats!
+    message: String
+  }
+  
+  type ClassMatch {
+    courseCode: String!
+    classType: String!
+    classId: String!
+    day: String!
+    startTime: String!
+    endTime: String!
+    location: String!
+    sharedWith: [ID!]!
+    matchScore: Int!
+  }
+  
+  type ScheduleStats {
+    totalClasses: Int!
+    classesWithAllFriends: Int!
+    classesWithSomeFriends: Int!
+    classesAlone: Int!
+    averageOverlap: Float!
   }
   
   input CreateEventInput {
@@ -297,13 +335,20 @@ const resolvers = {
       })
     },
     
+    searchCourses: async (_: any, { searchTerm, term = '25T1' }: any) => {
+      return searchCourses(searchTerm, term)
+    },
+    
     friends: async (_: any, { userId }: any) => {
       return prisma.friendship.findMany({
         where: {
           userId,
           status: 'ACCEPTED'
         },
-        include: { user: true, friend: true }
+        include: { 
+          user: true, 
+          friend: true
+        }
       })
     },
     
@@ -361,6 +406,16 @@ const resolvers = {
     }
   },
   
+  User: {
+    courses: async (parent: any) => {
+      return prisma.userCourse.findMany({
+        where: { userId: parent.id },
+        take: 3,
+        include: { course: true }
+      })
+    }
+  },
+  
   Mutation: {
     createUser: async (_: any, { email, name }: any) => {
       return prisma.user.create({
@@ -398,6 +453,11 @@ const resolvers = {
     },
     
     enrollCourse: async (_: any, { userId, courseCode, term }: any) => {
+      // Check current enrollment count (max 3 courses)
+      const currentEnrollments = await prisma.userCourse.count({
+        where: { userId }
+      })
+      
       // First, check if course exists or create it
       let course = await prisma.course.findUnique({
         where: { code: courseCode }
@@ -413,6 +473,28 @@ const resolvers = {
         })
       }
       
+      // Check if already enrolled
+      const existing = await prisma.userCourse.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId: course.id
+          }
+        },
+        include: { user: true, course: true }
+      })
+      
+      if (existing) {
+        // Already enrolled, just return the existing enrollment
+        return existing
+      }
+      
+      // Enforce 3-course limit
+      if (currentEnrollments >= 3) {
+        throw new Error('Maximum 3 courses allowed. Please unenroll from a course first.')
+      }
+      
+      // Create new enrollment
       return prisma.userCourse.create({
         data: {
           userId,
@@ -601,6 +683,61 @@ const resolvers = {
         data: { status },
         include: { user: true, groupEvent: true }
       })
+    },
+    
+    optimizeClassSchedule: async (_: any, { userIds, term = 'T3' }: any) => {
+      try {
+        // Fetch each user's selected courses
+        const userSelections = await Promise.all(
+          userIds.map(async (userId: string) => {
+            const user = await prisma.user.findUnique({
+              where: { id: userId },
+              select: { id: true, name: true }
+            })
+            
+            const userCourses = await prisma.userCourse.findMany({
+              where: { userId },
+              include: { course: true },
+              take: 3 // Limit to 3 courses
+            })
+            
+            return {
+              userId,
+              userName: user?.name || 'Unknown',
+              courses: userCourses.map((uc: any) => uc.course.code)
+            }
+          })
+        )
+        
+        // Find optimal class schedule
+        const classMatches = await findOptimalClassSchedule(userSelections, term)
+        
+        // Calculate statistics
+        const stats = calculateOverlapStats(classMatches, userIds.length)
+        
+        return {
+          success: true,
+          classMatches,
+          stats,
+          message: classMatches.length > 0 
+            ? `Found ${classMatches.length} optimal class times with average ${stats.averageOverlap.toFixed(1)} friends per class`
+            : `No classes found. Make sure users have enrolled in courses for term ${term}.`
+        }
+      } catch (error) {
+        console.error('Failed to optimize class schedule:', error)
+        return {
+          success: false,
+          classMatches: [],
+          stats: {
+            totalClasses: 0,
+            classesWithAllFriends: 0,
+            classesWithSomeFriends: 0,
+            classesAlone: 0,
+            averageOverlap: 0
+          },
+          message: `Failed to optimize schedule: ${error}`
+        }
+      }
     }
   }
 }
