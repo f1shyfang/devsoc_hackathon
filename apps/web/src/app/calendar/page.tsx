@@ -493,7 +493,7 @@ export default function CalendarPage() {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
               SyncUp Calendar
             </h1>
-            <p className="text-gray-600">
+            <p className="text-black">
               Find common free time with your friends and schedule group activities
             </p>
           </div>
@@ -513,7 +513,7 @@ export default function CalendarPage() {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Users className="w-5 h-5 text-blue-500" />
-                <h2 className="text-lg font-semibold">Select Friends</h2>
+                <h2 className="text-lg font-semibold text-black">Select Friends</h2>
               </div>
 
               <div className="space-y-2">
@@ -535,7 +535,7 @@ export default function CalendarPage() {
                         <p className="text-sm font-medium text-gray-900">
                           {friendship.friend.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-black">
                           {friendship.friend.email}
                         </p>
                         {friendship.friend.courses?.length > 0 && (
@@ -554,7 +554,7 @@ export default function CalendarPage() {
                     </label>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-black">
                     No friends added yet. Add friends to find common free time!
                   </p>
                 )}
@@ -580,9 +580,9 @@ export default function CalendarPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-blue-500" />
-                  <h2 className="text-lg font-semibold">Courses</h2>
+                  <h2 className="text-lg font-semibold text-black">Courses</h2>
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-black">
                   {selectedCourses.length}/3
                 </span>
               </div>
@@ -602,11 +602,11 @@ export default function CalendarPage() {
               {/* Course Results */}
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {courseSearchTerm.length < 2 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">
+                  <p className="text-sm text-black text-center py-4">
                     Type at least 2 characters to search
                   </p>
                 ) : coursesLoading ? (
-                  <p className="text-sm text-gray-500 text-center py-4">
+                  <p className="text-sm text-black text-center py-4">
                     Searching...
                   </p>
                   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -632,7 +632,7 @@ export default function CalendarPage() {
                         <p className="text-sm font-medium text-gray-900">
                           {course.code}
                         </p>
-                        <p className="text-xs text-gray-500 line-clamp-2">
+                        <p className="text-xs text-black line-clamp-2">
                           {course.name}
                         </p>
                         <p className="text-xs text-blue-600 mt-0.5">
@@ -642,7 +642,7 @@ export default function CalendarPage() {
                     </label>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500 text-center py-4">
+                  <p className="text-sm text-black text-center py-4">
                     No courses found
                   </p>
                 )}
@@ -650,7 +650,7 @@ export default function CalendarPage() {
 
               {selectedCourses.length > 0 && (
                 <div className="mt-4 pt-4 border-t">
-                  <p className="text-xs font-medium text-gray-700 mb-2">
+                  <p className="text-xs font-medium text-black mb-2">
                     Enrolled: {selectedCourses.length}/3
                   </p>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -699,7 +699,7 @@ export default function CalendarPage() {
 
             {/* Event Legend */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold mb-3">Event Types</h3>
+              <h3 className="font-semibold text-black mb-3">Event Types</h3>
               <div className="space-y-2">
                 {[
                   { type: "CLASS", label: "Classes" },
@@ -732,7 +732,7 @@ export default function CalendarPage() {
                 </div>
 
                 {availabilityLoading ? (
-                  <p className="text-gray-500">Finding available times...</p>
+                  <p className="text-black">Finding available times...</p>
                   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
                 ) : (availabilityData as any)?.findGroupAvailability?.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -749,7 +749,7 @@ export default function CalendarPage() {
                               <p className="font-medium text-gray-900">
                                 {format(new Date(slot.start), "EEE, MMM d")}
                               </p>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-sm text-black">
                                 {format(new Date(slot.start), "h:mm a")} -{" "}
                                 {format(new Date(slot.end), "h:mm a")}
                               </p>
@@ -766,7 +766,7 @@ export default function CalendarPage() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-500">
+                  <p className="text-black">
                     No common free time found. Try selecting different friends or
                     adjusting the time range.
                   </p>
@@ -820,7 +820,7 @@ export default function CalendarPage() {
               </div>
 
               {eventsLoading ? (
-                <p className="text-gray-500">Loading events...</p>
+                <p className="text-black">Loading events...</p>
                 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
               ) : (eventsData as any)?.events?.length > 0 ? (
                 <div className="space-y-3">
@@ -843,7 +843,7 @@ export default function CalendarPage() {
                                 {event.title}
                               </h3>
                               {event.course && (
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-black">
                                   {event.course.code} - {event.course.name}
                                 </p>
                               )}
@@ -856,7 +856,7 @@ export default function CalendarPage() {
                               {event.type}
                             </span>
                           </div>
-                          <div className="mt-2 text-sm text-gray-600">
+                          <div className="mt-2 text-sm text-black">
                             <p>
                               📅 {format(new Date(parseInt(event.startTime)), "EEE, MMM d")}
                             </p>
@@ -867,7 +867,7 @@ export default function CalendarPage() {
                             {event.location && <p>📍 {event.location}</p>}
                           </div>
                           {event.description && (
-                            <p className="mt-2 text-sm text-gray-700">
+                            <p className="mt-2 text-sm text-black">
                               {event.description}
                             </p>
                           )}
@@ -879,7 +879,7 @@ export default function CalendarPage() {
               ) : (
                 <div className="text-center py-12">
                   <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">
+                  <p className="text-black">
                     No events scheduled. Add your first event or sync your
                     timetable!
                   </p>
@@ -1050,7 +1050,7 @@ export default function CalendarPage() {
               <div className="flex items-center justify-between p-6 border-b">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">🎯 Optimized Class Schedule</h2>
-                  <p className="text-sm text-gray-600 mt-1">{optimizationData.message}</p>
+                  <p className="text-sm text-black mt-1">{optimizationData.message}</p>
                 </div>
                 <button
                   onClick={() => setShowOptimizationResults(false)}
@@ -1064,19 +1064,19 @@ export default function CalendarPage() {
                 {/* Statistics */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Total Classes</p>
+                    <p className="text-sm text-black">Total Classes</p>
                     <p className="text-2xl font-bold text-blue-600">{optimizationData.stats.totalClasses}</p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">All Friends Together</p>
+                    <p className="text-sm text-black">All Friends Together</p>
                     <p className="text-2xl font-bold text-green-600">{optimizationData.stats.classesWithAllFriends}</p>
                   </div>
                   <div className="bg-yellow-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Some Friends</p>
+                    <p className="text-sm text-black">Some Friends</p>
                     <p className="text-2xl font-bold text-yellow-600">{optimizationData.stats.classesWithSomeFriends}</p>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Avg Overlap</p>
+                    <p className="text-sm text-black">Avg Overlap</p>
                     <p className="text-2xl font-bold text-purple-600">{optimizationData.stats.averageOverlap.toFixed(1)}</p>
                   </div>
                 </div>
@@ -1108,10 +1108,10 @@ export default function CalendarPage() {
                               )}
                             </span>
                           </div>
-                          <div className="text-sm text-gray-600 space-y-1">
+                          <div className="text-sm text-black space-y-1">
                             <p>📅 {match.day} at {match.startTime} - {match.endTime}</p>
                             <p>📍 {match.location}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-black">
                               {match.matchScore === selectedFriends.length + 1 ? (
                                 <span className="text-green-600 font-medium">✓ All friends in same class!</span>
                               ) : match.matchScore > 1 ? (
